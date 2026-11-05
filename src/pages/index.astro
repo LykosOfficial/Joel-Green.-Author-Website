@@ -1,0 +1,98 @@
+---
+import Layout from '../layouts/layout.astro';
+
+// Writing progress for The Halo comes from the API (edited in the admin's Books page).
+// Read once at build time, then refreshed live in the browser (script below), so a new
+// word count shows up without redeploying. Falls back to the last known numbers if the
+// API can't be reached at build time.
+const API = (import.meta.env.PUBLIC_API_URL ?? 'https://api.joelgreen.studio').replace(/\/$/, '');
+const BOOK_SLUG = 'the-halo';
+let wordcount = 3377;
+let wordtarget = 80000;
+try {
+	const books = (await (await fetch(`${API}/content/books`, { signal: AbortSignal.timeout(10_000) })).json()) as {
+		slug: string;
+		wordCount: number;
+		targetWordCount: number | null;
+	}[];
+	const book = books.find((b) => b.slug === BOOK_SLUG);
+	if (book) {
+		wordcount = book.wordCount;
+		wordtarget = book.targetWordCount || wordtarget;
+	}
+} catch {
+	console.warn(`[author] Couldn't load word count from ${API}; using fallback numbers`);
+}
+const progressPct = Math.min(100, (wordcount / wordtarget) * 100).toFixed(2);
+const currentYear = new Date().getFullYear();
+---
+<Layout>
+	<main class="min-h-screen bg-black text-white flex flex-col items-center justify-center px-8 py-16">
+		<p class="text-[11px] tracking-[3px] uppercase text-neutral-400 mb-5">
+			World Architect <span class="text-brand-teal mx-2">—</span>
+			Mythologist <span class="text-brand-teal mx-2">—</span>
+			Aspiring Novelist
+		</p>
+		<h1 class="text-5xl font-bold uppercase tracking-tight mb-8">JOEL GREEN<span class="text-brand-teal">.</span></h1>
+		<p class="text-sm text-neutral-400 text-center max-w-md mb-8">Writing <span class="text-brand-gold">The Halo</span> — Book ONE of the Astroseed Trilogy.<br />
+		Near future. Corporate Conspiracy.<br />
+		<i>The truth costs everything.</i>
+		</p>
+
+		<div class="w-full max-w[340px] mb-12">
+			<div class="flex justify-between mb-2">
+				<span class="text-[10px] tracking-[2px] uppercase text-neutral-500">Writing Progress</span>
+				<span class="text-[12px] text-brand-teal" data-wordcount>{wordcount.toLocaleString()} words</span>
+			</div>
+			<div class="h-px w-full bg-neutral-800">
+				<div class="h-px bg-brand-teal" data-progress style={`width: ${progressPct}%`}></div>
+			</div>
+			<p class="text-[10px] text-neutral-700 text-right mt-1" data-wordtarget>Target — {wordtarget.toLocaleString()} words</p>
+		</div>
+<div class="pt-8 max-w-md text-justify text-[13px] text-neutral-500 leading-relaxed space-y-4">
+      <p>
+        Hi, I'm Joel Green. An aspiring novelist who doesn't just dream worlds —
+        I live in them. Every story I read or write I ask: what does this
+        world look and feel like? Not through the character's eyes alone,
+        but through my own.
+      </p>
+      <p>
+        <span class="text-brand-gold">The Halo</span> is my debut novel. A
+        near future sci-fi thriller about corporate power, survival, and a
+        truth that costs everything. Book one of the Astroseed Trilogy.
+      </p>
+      <p>
+        Imagination is the lens through which literature lets us see the
+        worlds authors build. The most honest stories aren't ones that feel
+        like fiction — they feel tangible. Familiar. Like home.
+      </p>
+    </div>
+  </main>
+
+  <footer class="bg-black flex items-center justify-between px-8 py-4 border-t border-neutral-900">
+    <span class="text-[11px] font-bold tracking-[2px] uppercase text-white">
+      JOEL GREEN<span class="text-brand-teal">.</span>
+    </span>
+    <span class="text-[9px] tracking-[1px] uppercase text-neutral-700">© {currentYear}</span>
+  </footer>
+</Layout>
+
+<!-- Live word count: fetches the latest numbers so admin edits show without a redeploy -->
+<script is:inline define:vars={{ API, BOOK_SLUG }}>
+	fetch(`${API}/content/books`)
+		.then((r) => (r.ok ? r.json() : Promise.reject()))
+		.then((books) => {
+			const book = books.find((b) => b.slug === BOOK_SLUG);
+			if (!book) return;
+			const target = book.targetWordCount || 0;
+			const count = document.querySelector('[data-wordcount]');
+			if (count) count.textContent = `${book.wordCount.toLocaleString()} words`;
+			if (target) {
+				const bar = document.querySelector('[data-progress]');
+				if (bar) bar.style.width = `${Math.min(100, (book.wordCount / target) * 100).toFixed(2)}%`;
+				const goal = document.querySelector('[data-wordtarget]');
+				if (goal) goal.textContent = `Target — ${target.toLocaleString()} words`;
+			}
+		})
+		.catch(() => {}); // keep the built-in numbers
+</script>
