@@ -8,11 +8,13 @@ interface Props {
 
 const {
   title = "Joel Green.",
-  description = "Joel Green — world architect, mythologist, aspiring novelist. Writing The Halo, book one of the Astroseed Trilogy. Near future. Corporate conspiracy. The truth costs everything.",
+  description = "Joel Green — world architect, mythologist, aspiring novelist. Writing The Halo, Book One of the Astroseed Trilogy. Near-future. Corporate conspiracy. The truth costs everything.",
 } = Astro.props;
 
 // Astro.site comes from `site` in astro.config.mjs (https://joelgreenauthor.com)
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const ogImage = new URL('/og-default.png', Astro.site);
+const ogImageAlt = 'Joel Green. Writing The Halo, Book One of the Astroseed Trilogy.';
 ---
 
 <!DOCTYPE html>
@@ -41,11 +43,18 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     <meta property="og:url" content={canonicalURL} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
+    <!-- Share image (public/og-default.png, 1200×630): shows as a card when the link is shared -->
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={ogImageAlt} />
 
     <!-- X / Twitter -->
-    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+    <meta name="twitter:image:alt" content={ogImageAlt} />
   </head>
   <body>
     <slot />

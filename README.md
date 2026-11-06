@@ -2,7 +2,7 @@
 
 **Live site:** [joelgreenauthor.com](https://joelgreenauthor.com)
 
-The home page of Joel Green, *world architect, mythologist, aspiring novelist*, currently writing **The Halo**, book one of the Astroseed Trilogy: a near-future sci-fi thriller about corporate power, survival, and a truth that costs everything.
+The home page of Joel Green, *world architect, mythologist, aspiring novelist*, currently writing **The Halo**, Book One of the Astroseed Trilogy: a near-future sci-fi thriller about corporate power, survival, and a truth that costs everything.
 
 It's a single, minimal dark page: the "JOEL GREEN." wordmark, a short introduction, a biography, and a **live writing-progress bar** showing how far along *The Halo* is.
 
