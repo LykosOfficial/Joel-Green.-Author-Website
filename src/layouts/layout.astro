@@ -7,7 +7,8 @@ interface Props {
 }
 
 const {
-  title = "Joel Green.",
+  // What shows as the blue link in Google: name + what he's known for (keep under ~60 characters)
+  title = "Joel Green — Sci-Fi Author of The Halo | Astroseed Trilogy",
   description = "Joel Green — world architect, mythologist, aspiring novelist. Writing The Halo, Book One of the Astroseed Trilogy. Near-future. Corporate conspiracy. The truth costs everything.",
 } = Astro.props;
 
@@ -15,6 +16,57 @@ const {
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 const ogImage = new URL('/og-default.png', Astro.site);
 const ogImageAlt = 'Joel Green. Writing The Halo, Book One of the Astroseed Trilogy.';
+
+// Structured data (JSON-LD): tells Google who Joel Green is, what he's writing, and that
+// this site and the blog (joelgreen.studio) belong to the same person.
+const SITE = 'https://joelgreenauthor.com';
+const BLOG = 'https://joelgreen.studio';
+const jsonLd = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebSite',
+      '@id': `${SITE}/#website`,
+      url: `${SITE}/`,
+      name: 'Joel Green',
+      alternateName: 'Joel Green, Author',
+      inLanguage: 'en',
+      publisher: { '@id': `${SITE}/#joel-green` },
+    },
+    {
+      '@type': 'ProfilePage',
+      '@id': `${SITE}/#profile`,
+      url: `${SITE}/`,
+      name: title,
+      isPartOf: { '@id': `${SITE}/#website` },
+      mainEntity: { '@id': `${SITE}/#joel-green` },
+    },
+    {
+      '@type': 'Person',
+      '@id': `${SITE}/#joel-green`,
+      name: 'Joel Green',
+      url: `${SITE}/`,
+      jobTitle: 'Author',
+      description: 'Sci-fi thriller author, world architect and mythologist, writing The Halo, Book One of the Astroseed Trilogy.',
+      knowsAbout: ['Science fiction', 'Worldbuilding', 'Mythology', 'Thriller fiction'],
+      // Same person as the author on the blog
+      sameAs: [`${BLOG}/`, `${BLOG}/about/`],
+      image: ogImage.href,
+    },
+    {
+      '@type': 'Book',
+      '@id': `${SITE}/#the-halo`,
+      name: 'The Halo',
+      author: { '@id': `${SITE}/#joel-green` },
+      genre: ['Science fiction', 'Thriller'],
+      description: 'A near-future sci-fi thriller about corporate power, survival, and a truth that costs everything.',
+      inLanguage: 'en',
+      creativeWorkStatus: 'In progress',
+      isPartOf: { '@type': 'BookSeries', name: 'Astroseed Trilogy', author: { '@id': `${SITE}/#joel-green` } },
+      position: 1,
+    },
+  ],
+}).replace(/</g, '\\u003c');
 ---
 
 <!DOCTYPE html>
@@ -55,6 +107,8 @@ const ogImageAlt = 'Joel Green. Writing The Halo, Book One of the Astroseed Tril
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImage} />
     <meta name="twitter:image:alt" content={ogImageAlt} />
+
+    <script type="application/ld+json" set:html={jsonLd} />
   </head>
   <body>
     <slot />
